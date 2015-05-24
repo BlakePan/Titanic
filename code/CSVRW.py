@@ -18,7 +18,7 @@ logger.setLevel(log_level)
 
 feature = 10 #total feature number
 def CSV_read(Labels, X, T):
-	skip = [3,8,10]# filter some VARIABLEs for useless
+	skip = [3,8,9,10]# filter some VARIABLEs for useless
 	with open('../data/train.csv', 'r') as incsv:
 	#with open('../data/train0.csv', 'r') as incsv:
 		train_data = csv.reader(incsv)    # read training data and lables

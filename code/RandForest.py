@@ -45,36 +45,41 @@ if __name__ == "__main__":
 	F = len(X[0])		# F -> number of features; cols
 	N = len(X)			# N -> number of data; rows
 	NT = len(T)			# NT -> number of test data; rows
-	
+
+	#Find non numeric features
+	non_numeric_F = []
+	test_F = X[1] #each element in X[1] has value, use it to find who should be skiped
+	for ith_feature in range(F):
+		try:
+			tmp = float(test_F[ith_feature])# convert to float OK, skip this feature
+			#skip_condition.append(ith_feature)
+		except Exception, e:
+			non_numeric_F.append(ith_feature)
+			pass #convert fail, need converstion dict
+	logger.debug("non numeric feature")
+	logger.debug(non_numeric_F)
+
 	#Prepare Feature Condition
 	featurecondit = []
-	for j in range(F):
+	for ith_feature in non_numeric_F:
 		tmp = []
-		for i in range(N):
-			if (len(tmp) == 0 or X[i][j] not in tmp):
-				tmp.append(X[i][j])
+		for ith_data in range(N):
+			if (len(tmp) == 0 or X[ith_data][ith_feature] not in tmp):
+				tmp.append(X[ith_data][ith_feature])
 		featurecondit.append(tmp)
 
 	logger.debug("Feature Condition")
 	logger.debug(featurecondit)
+
 	#Prepare Feature Convert dict
-	#Convert abstract condition to real number
-	#skip some condition which is already real number
-	skip_condition = [0,2,3,4,5] #0:pclass, 2:AGE, #4:Passenger fare
-	skip_F = list(range(F)) #condiction list afer del members which is already real number
-	offset = 0
-	for s in skip_condition:
-		s -= offset
-		offset += 1
-		del(skip_F[s])
-	
+	#Convert non numeric condition to real number
 	feature_convrt_dict = []
-	for i in skip_F:
-		f_num = len(featurecondit[i])
+	for ith_feature in range(len(featurecondit)):
+		total_condit_num = len(featurecondit[ith_feature])
 		tmp_dict = {}
-		for f in range(f_num):
-			key = featurecondit[i][f]
-			tmp_dict.update({key:f})
+		for jth_condit in range(total_condit_num):
+			key = featurecondit[ith_feature][jth_condit]
+			tmp_dict.update({key:jth_condit})
 		feature_convrt_dict.append(tmp_dict)
 
 	logger.debug("Feature Convert table")
@@ -88,17 +93,15 @@ if __name__ == "__main__":
 		tmp_list = []
 		offset = 0
 		for ith_feature in range(F):
-			#print ith_feature			
-			if (ith_feature not in skip_F): #already real number, just put in list
+			if (ith_feature not in non_numeric_F): #already real number, just put in list
 				tmp_value = X[ith_data][ith_feature]
 				try:
 					tmp_value = float(tmp_value)
 					pass
 				except Exception, e:
-					tmp_value = -1
+					tmp_value = -1 #some blank in numeric feature
 
-				tmp_list.append(tmp_value)
-				#tmp_list.append( float(X[ith_data][ith_feature]) )
+				tmp_list.append(tmp_value)				
 				offset += 1
 			else: #need conversion
 				cur_condit = X[ith_data][ith_feature]
@@ -112,9 +115,8 @@ if __name__ == "__main__":
 	for ith_data in range(NT):
 		tmp_list_t = []
 		offset = 0
-		for ith_feature in range(F):
-			#print ith_feature			
-			if (ith_feature not in skip_F): #already real number, just put in list
+		for ith_feature in range(F):			
+			if (ith_feature not in non_numeric_F): #already real number, just put in list
 				tmp_value = T[ith_data][ith_feature]
 				try:
 					tmp_value = float(tmp_value)
@@ -122,8 +124,7 @@ if __name__ == "__main__":
 				except Exception, e:
 					tmp_value = -1
 
-				tmp_list_t.append(tmp_value)
-				#tmp_list_t.append(T[ith_data][ith_feature])
+				tmp_list_t.append(tmp_value)				
 				offset += 1
 			else: #need conversion
 				cur_condit = T[ith_data][ith_feature]
@@ -140,17 +141,13 @@ if __name__ == "__main__":
 	logger.info("Step 2: Training")
 
 	model = RandomForestClassifier(n_estimators  = forestsize)
-	X = np.array(X)
-
-	logger.debug("Convert X to numpy array")
-	for i in range(5):
-		logger.debug(X_rebuild[i])
+	#train
 	model.fit(X_rebuild,labels)
 
 	logger.info("Step 2 finish")
 
 	##
-	logger.info("Step 2: Training")
+	logger.info("Step 3: Predict")
 
 	pred_y = model.predict(T_rebuild)
 	logger.debug("Predict value:")

@@ -1,5 +1,4 @@
 *.log
-*.csv
 *.pyc
 *.gz
 *~
