@@ -49,7 +49,7 @@ def CSV_write(Fname, Leng, WTdata):
 		csv_writer = csv.writer(outcsv)
 		csv_writer.writerow(["PassengerId", "Survived"])
 		for y in range(Leng):
-			csv_writer.writerow([y + 891, WTdata[y]])
+			csv_writer.writerow([y + 892, WTdata[y]])
 
 if __name__ == "__main__":
 	Labels = []

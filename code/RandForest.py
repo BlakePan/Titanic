@@ -20,7 +20,7 @@ logger.addHandler(handler)
 logger.setLevel(log_level)
 
 #Parameters 
-forestsize = 5    # how many trees in a forest
+forestsize = 100    # how many trees in a forest
 
 if __name__ == "__main__":
 	##
