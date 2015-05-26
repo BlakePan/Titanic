@@ -5,6 +5,7 @@ from random import randint
 import CSVRW
 
 from sklearn.ensemble import RandomForestClassifier
+from sklearn import preprocessing
 
 #logging setting
 log_file = "./RandForest.log"
@@ -31,14 +32,14 @@ if __name__ == "__main__":
 	CSVRW.CSV_read(labels, X, T)    # Read data from csv files
 	#in csv read i delete some feature because i think that is useless(like name of passengers)
 	#in future i want the useless information can be deleted automatically
-	logger.debug("labels[0]~[4]")
-	for i in range(5):
+	logger.debug("labels[0]~[5]")
+	for i in range(6):
 		logger.debug(labels[i])
-	logger.debug("X[0]~[4]")
-	for i in range(5):
+	logger.debug("X[0]~[5]")
+	for i in range(6):
 		logger.debug(X[i])
-	logger.debug("T[0]~[4]")
-	for i in range(5):
+	logger.debug("T[0]~[5]")
+	for i in range(6):
 		logger.debug(T[i])
 
 	#Kown Constants
@@ -58,6 +59,25 @@ if __name__ == "__main__":
 			pass #convert fail, need converstion dict
 	logger.debug("non numeric feature")
 	logger.debug(non_numeric_F)
+
+	#replace '' with 0
+	for ith_data in xrange(N):
+		for ith_feature in xrange(F):
+			if (X[ith_data][ith_feature] == ''):
+				X[ith_data][ith_feature] = 0
+
+	for ith_data in xrange(NT):
+		for ith_feature in xrange(F):
+			if (T[ith_data][ith_feature] == ''):
+				T[ith_data][ith_feature] = 0
+
+	logger.debug("X[0]~[5]")
+	for i in range(6):
+		logger.debug(X[i])
+	logger.debug("T[0]~[5]")
+	for i in range(6):
+		logger.debug(T[i])
+
 
 	#Prepare Feature Condition
 	featurecondit = []
@@ -84,10 +104,10 @@ if __name__ == "__main__":
 
 	logger.debug("Feature Convert table")
 	logger.debug(feature_convrt_dict)
-	
+
 	#Use convert dict rebuild training and testing data
 	X_rebuild = []
-	T_rebuild = []	
+	T_rebuild = []
 
 	for ith_data in range(N):
 		tmp_list = []
@@ -134,13 +154,25 @@ if __name__ == "__main__":
 	logger.debug("Rebuild T[0]~T[4]")
 	for i in range(5):
 		logger.debug(T_rebuild[i])
+
+	#Standrize
+	X_rebuild = preprocessing.scale(X_rebuild)
+	T_rebuild = preprocessing.scale(T_rebuild)
+
+	logger.debug("std Rebuild X[0]~X[4]")
+	for i in range(5):
+		logger.debug(X_rebuild[i])
+
+	logger.debug("Rebuild T[0]~T[4]")
+	for i in range(5):
+		logger.debug(T_rebuild[i])
 	
 	logger.info("Step 1 finish")
 
 	##
 	logger.info("Step 2: Training")
 
-	model = RandomForestClassifier(n_estimators  = forestsize)
+	model = RandomForestClassifier(n_estimators = forestsize, oob_score = True)
 	#train
 	model.fit(X_rebuild,labels)
 
